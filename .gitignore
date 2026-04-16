@@ -4,15 +4,32 @@ config.json
 # Generated reports
 reports/*.json
 reports/*.pdf
+reports/*.tmp
 
 # Python cache
 __pycache__/
+*/__pycache__/
 *.pyc
 *.pyo
+*.pyd
 
 # Virtual environments
 venv/
+venv*/
+.venv/
+.env
 .env/
 
-# VS Code local settings
+# Editor settings
 .vscode/
+.idea/
+
+# Windows / OS junk
+Thumbs.db
+Desktop.ini
+
+# Local runtime / packaging artifacts
+build/
+dist/
+*.spec
+*.spec.bak

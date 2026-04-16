@@ -1,4 +1,4 @@
-from socprobe_local_ui import launch_app
+from socprobe_desktop import launch_app
 
 
 if __name__ == "__main__":
