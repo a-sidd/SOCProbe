@@ -8,10 +8,22 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
+class ConfigLoadError(RuntimeError):
+    def __init__(self, message: str, *, expected_path: Path, runtime_root: Path, report_directory: Path):
+        super().__init__(message)
+        self.expected_path = expected_path
+        self.runtime_root = runtime_root
+        self.report_directory = report_directory
+
+
 def get_runtime_root() -> Path:
     if getattr(sys, "frozen", False):
         return Path(sys.executable).resolve().parent
     return PROJECT_ROOT
+
+
+def get_reports_root() -> Path:
+    return get_runtime_root() / "reports"
 
 
 def _fqdn_from_base_dn(base_dn: str) -> str:
@@ -52,6 +64,18 @@ def _resolve_output_path(output_root: Path, configured_path: str | None, default
 def load_config(config_path: str | None = None) -> dict:
     path = _resolve_config_path(config_path)
     runtime_root = get_runtime_root()
+    reports_root = get_reports_root()
+
+    if not path.exists():
+        raise ConfigLoadError(
+            (
+                "config.json is missing. Place config.json next to the executable when running a packaged build, "
+                "or in the project root when running from source."
+            ),
+            expected_path=path,
+            runtime_root=runtime_root,
+            report_directory=reports_root,
+        )
 
     with path.open("r", encoding="utf-8") as handle:
         config = json.load(handle)
@@ -82,6 +106,7 @@ def load_config(config_path: str | None = None) -> dict:
 
     report_path = _resolve_output_path(runtime_root, output.get("report_path"), "reports\\soc_report.json")
     pdf_report_path = _resolve_output_path(runtime_root, output.get("pdf_report_path"), "reports\\soc_report.pdf")
+    report_path.parent.mkdir(parents=True, exist_ok=True)
 
     output["report_path"] = str(report_path)
     output["pdf_report_path"] = str(pdf_report_path)

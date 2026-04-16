@@ -7,7 +7,7 @@
 
 from modules.ad_connector import connect_to_ad
 from modules.analysis_engine import run_assessment
-from modules.config_loader import load_config
+from modules.config_loader import ConfigLoadError, load_config
 from modules.scoring_engine import calculate_score
 from modules.report_generator import generate_report
 
@@ -17,7 +17,14 @@ def main():
     print("  Sheridan College Capstone — INFO36206")
     print("=" * 55)
 
-    config = load_config()
+    try:
+        config = load_config()
+    except ConfigLoadError as exc:
+        print("\n[!] Configuration missing")
+        print(f"    config.json expected at: {exc.expected_path}")
+        print(f"    reports folder: {exc.report_directory} (created automatically when needed)")
+        raise SystemExit(1)
+
     conn = connect_to_ad(config)
 
     print("\n[*] Running checks...\n")

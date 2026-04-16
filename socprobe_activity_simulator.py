@@ -11,7 +11,7 @@ from tkinter import messagebox, ttk
 from ldap3 import Connection, NTLM, SIMPLE, Server
 from ldap3.core.exceptions import LDAPException
 
-from modules.config_loader import load_config
+from modules.config_loader import ConfigLoadError, load_config
 
 
 APP_BG = "#0B1621"
@@ -449,16 +449,30 @@ class SOCProbeActivitySimulator:
         self._run_async("Open Active Directory Users and Computers", lambda: self._launch_process(["dsa.msc"]))
 
     def _launch_main_app(self) -> None:
-        self._run_async("Launch main SOCProbe app", lambda: self._launch_process([sys.executable, str(Path(__file__).with_name("ui.py"))]))
+        self._run_async("Launch main SOCProbe app", self._launch_main_socprobe)
 
     def _open_reports_folder(self) -> None:
         reports_folder = Path(self.config["output"]["report_path"]).resolve().parent
 
         def action() -> str:
+            reports_folder.mkdir(parents=True, exist_ok=True)
             os.startfile(reports_folder)
             return f"Opened reports folder: {reports_folder}"
 
         self._run_async("Open reports folder", action)
+
+    def _launch_main_socprobe(self) -> str:
+        if getattr(sys, "frozen", False):
+            main_executable = Path(sys.executable).resolve().with_name("SOCProbe.exe")
+            if not main_executable.exists():
+                raise RuntimeError(
+                    "SOCProbe.exe was not found next to the simulator executable. "
+                    "Place both executables together in the same delivery folder."
+                )
+            command = [str(main_executable)]
+        else:
+            command = [sys.executable, str(Path(__file__).resolve().with_name("ui.py"))]
+        return self._launch_process(command)
 
     def _launch_process(self, command: list[str]) -> str:
         subprocess.Popen(command)
@@ -467,8 +481,24 @@ class SOCProbeActivitySimulator:
 
 def launch_activity_simulator() -> None:
     root = tk.Tk()
-    SOCProbeActivitySimulator(root)
-    root.mainloop()
+    try:
+        SOCProbeActivitySimulator(root)
+        root.mainloop()
+    except ConfigLoadError as exc:
+        root.withdraw()
+        messagebox.showerror(
+            "SOCProbe Activity Simulator Configuration Missing",
+            (
+                "Configuration missing.\n\n"
+                "config.json could not be found.\n\n"
+                "For the packaged executable, place config.json next to the executables in dist.\n\n"
+                f"Expected location:\n{exc.expected_path}\n\n"
+                f"Reports folder:\n{exc.report_directory}\n"
+                "The reports folder will be created automatically when needed."
+            ),
+            parent=root,
+        )
+        root.destroy()
 
 
 if __name__ == "__main__":

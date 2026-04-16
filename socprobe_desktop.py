@@ -7,10 +7,10 @@ import threading
 import time
 import tkinter as tk
 from pathlib import Path
-from tkinter import filedialog, font as tkfont, ttk
+from tkinter import filedialog, font as tkfont, messagebox, ttk
 
 from modules.ad_connector import connect_to_ad, test_ad_connection
-from modules.config_loader import load_config
+from modules.config_loader import ConfigLoadError, load_config
 from modules.disabled_account_checker import check_disabled_accounts
 from modules.event_log_reader import get_event_log_status
 from modules.log_validation import check_event_logs
@@ -771,6 +771,7 @@ def _apply_live_control(self, key: str, control_result: dict):
 
 
 def _open_reports_folder(self):
+    self.report_json_path.parent.mkdir(parents=True, exist_ok=True)
     os.startfile(str(self.report_json_path.parent))
 
 
@@ -993,13 +994,29 @@ SOCProbeDesktopApp._final_apply_error = _final_apply_error
 
 def launch_app():
     root = tk.Tk()
-    style = ttk.Style()
-    style.theme_use("default")
-    style.configure("TNotebook", background=APP_BG, borderwidth=0)
-    style.configure("TNotebook.Tab", background=SURFACE_BG, foreground=TEXT, padding=(14, 8), borderwidth=0)
-    style.map("TNotebook.Tab", background=[("selected", CARD_ALT)], foreground=[("selected", TEXT)])
-    SOCProbeDesktopApp(root)
-    root.mainloop()
+    try:
+        style = ttk.Style()
+        style.theme_use("default")
+        style.configure("TNotebook", background=APP_BG, borderwidth=0)
+        style.configure("TNotebook.Tab", background=SURFACE_BG, foreground=TEXT, padding=(14, 8), borderwidth=0)
+        style.map("TNotebook.Tab", background=[("selected", CARD_ALT)], foreground=[("selected", TEXT)])
+        SOCProbeDesktopApp(root)
+        root.mainloop()
+    except ConfigLoadError as exc:
+        root.withdraw()
+        messagebox.showerror(
+            "SOCProbe Configuration Missing",
+            (
+                "Configuration missing.\n\n"
+                "config.json could not be found.\n\n"
+                "For the packaged executable, place config.json next to SOCProbe.exe in dist.\n\n"
+                f"Expected location:\n{exc.expected_path}\n\n"
+                f"Reports folder:\n{exc.report_directory}\n"
+                "The reports folder will be created automatically when needed."
+            ),
+            parent=root,
+        )
+        root.destroy()
 
 
 if __name__ == "__main__":
