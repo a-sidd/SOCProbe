@@ -1,0 +1,36 @@
+{
+  "organization": {
+    "name": "SOCLab SMB",
+    "industry": "Academic Demo Environment",
+    "environment": "Windows Server 2022 local deployment",
+    "summary": "Single-company SOC assessment profile for the local capstone environment."
+  },
+  "domain": {
+    "server": "127.0.0.1",
+    "port": 389,
+    "base_dn": "DC=soclab,DC=local",
+    "username": "SOCLAB\\Administrator",
+    "password": "CHANGE_ME"
+  },
+  "thresholds": {
+    "stale_account_days": 90,
+    "max_domain_admins": 3,
+    "security_log_lookback_days": 7,
+    "security_log_max_events": 250
+  },
+  "privileged_groups": [
+    "Domain Admins",
+    "Administrators",
+    "Schema Admins",
+    "Enterprise Admins"
+  ],
+  "weights": {
+    "privileged_groups": 30,
+    "stale_accounts": 25,
+    "disabled_accounts": 15,
+    "log_validation": 30
+  },
+  "output": {
+    "report_path": "reports\\soc_report.json"
+  }
+}

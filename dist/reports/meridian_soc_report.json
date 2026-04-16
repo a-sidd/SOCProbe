@@ -1,0 +1,270 @@
+{
+    "tool": "SOCProbe",
+    "version": "1.0",
+    "organization": "Meridian",
+    "company_profile": {
+        "summary": "Derived from AD OU naming patterns such as 'Meridian_IT'.",
+        "departments": [
+            "Meridian_Disabled",
+            "Meridian_Finance",
+            "Meridian_HR",
+            "Meridian_IT",
+            "Meridian_Management",
+            "Meridian_Operations",
+            "Meridian_Sales",
+            "Meridian_ServiceAccounts"
+        ]
+    },
+    "domain": "soclab.local",
+    "timestamp": "2026-04-07T07:21:55.078867",
+    "soc_readiness_score": 26.7,
+    "risk_level": "POOR",
+    "findings": {
+        "privileged_groups": {
+            "passed": false,
+            "domain_admin_count": 9,
+            "max_allowed": 3,
+            "groups": {
+                "Domain Admins": {
+                    "member_count": 9,
+                    "members": [
+                        "Old Sysadmin 2020",
+                        "Ex CTO Account",
+                        "Ex IT Admin",
+                        "SVC SQL Reporting",
+                        "SVC Backup Agent",
+                        "Robert Harrington",
+                        "Kevin Park",
+                        "Marcus Chen",
+                        "Administrator"
+                    ]
+                },
+                "Administrators": {
+                    "member_count": 3,
+                    "members": [
+                        "Domain Admins",
+                        "Enterprise Admins",
+                        "Administrator"
+                    ]
+                },
+                "Schema Admins": {
+                    "member_count": 1,
+                    "members": [
+                        "Administrator"
+                    ]
+                },
+                "Enterprise Admins": {
+                    "member_count": 1,
+                    "members": [
+                        "Administrator"
+                    ]
+                }
+            },
+            "total_privileged_members": 11,
+            "finding": "FAIL - Domain Admins has 9 members (max: 3)"
+        },
+        "stale_accounts": {
+            "passed": false,
+            "stale_count": 0,
+            "never_logged_in_count": 37,
+            "stale_accounts": [],
+            "never_logged_in": [
+                {
+                    "name": "Marcus Chen",
+                    "sam": "mchen"
+                },
+                {
+                    "name": "Priya Sharma",
+                    "sam": "psharma"
+                },
+                {
+                    "name": "Derek Walsh",
+                    "sam": "dwalsh"
+                },
+                {
+                    "name": "Natalie Brooks",
+                    "sam": "nbrooks"
+                },
+                {
+                    "name": "Sandra Mitchell",
+                    "sam": "smitchell"
+                },
+                {
+                    "name": "Kevin Park",
+                    "sam": "kpark"
+                },
+                {
+                    "name": "Laura Evans",
+                    "sam": "levans"
+                },
+                {
+                    "name": "Brian Torres",
+                    "sam": "btorres"
+                },
+                {
+                    "name": "Chloe Nguyen",
+                    "sam": "cnguyen"
+                },
+                {
+                    "name": "Rachel Kim",
+                    "sam": "rkim"
+                },
+                {
+                    "name": "James Foster",
+                    "sam": "jfoster"
+                },
+                {
+                    "name": "Diana Patel",
+                    "sam": "dpatel"
+                },
+                {
+                    "name": "Steven Murphy",
+                    "sam": "smurphy"
+                },
+                {
+                    "name": "Angela Ross",
+                    "sam": "aross"
+                },
+                {
+                    "name": "Carlos Reyes",
+                    "sam": "creyes"
+                },
+                {
+                    "name": "Hannah Bell",
+                    "sam": "hbell"
+                },
+                {
+                    "name": "Omar Hassan",
+                    "sam": "ohassan"
+                },
+                {
+                    "name": "Tiffany Morgan",
+                    "sam": "tmorgan"
+                },
+                {
+                    "name": "Luke Carter",
+                    "sam": "lcarter"
+                },
+                {
+                    "name": "Megan Adams",
+                    "sam": "madams"
+                },
+                {
+                    "name": "Ryan Scott",
+                    "sam": "rscott"
+                },
+                {
+                    "name": "Vanessa Turner",
+                    "sam": "vturner"
+                },
+                {
+                    "name": "Robert Harrington",
+                    "sam": "rharrington"
+                },
+                {
+                    "name": "Susan Blake",
+                    "sam": "sblake"
+                },
+                {
+                    "name": "Michael Grant",
+                    "sam": "mgrant"
+                },
+                {
+                    "name": "SVC Backup Agent",
+                    "sam": "svc_backup"
+                },
+                {
+                    "name": "SVC Monitoring",
+                    "sam": "svc_monitoring"
+                },
+                {
+                    "name": "SVC SQL Reporting",
+                    "sam": "svc_sqlreport"
+                },
+                {
+                    "name": "SVC File Server",
+                    "sam": "svc_fileserver"
+                },
+                {
+                    "name": "SVC Antivirus",
+                    "sam": "svc_antivirus"
+                },
+                {
+                    "name": "James Thompson 2019",
+                    "sam": "jthompson2019"
+                },
+                {
+                    "name": "Amy White Old",
+                    "sam": "awhite_old"
+                },
+                {
+                    "name": "Contractor 2021",
+                    "sam": "contractor01"
+                },
+                {
+                    "name": "Contractor 2022",
+                    "sam": "contractor02"
+                },
+                {
+                    "name": "SVC Legacy App",
+                    "sam": "svc_legacyapp"
+                },
+                {
+                    "name": "CodexSandboxOffline",
+                    "sam": "CodexSandboxOffline"
+                },
+                {
+                    "name": "CodexSandboxOnline",
+                    "sam": "CodexSandboxOnline"
+                }
+            ],
+            "threshold_days": 90,
+            "finding": "FAIL - 37 stale/inactive accounts detected"
+        },
+        "disabled_accounts": {
+            "passed": false,
+            "count": 3,
+            "accounts": [
+                {
+                    "name": "Ex IT Admin",
+                    "sam": "ex_itadmin",
+                    "privileged_group": "Domain Admins"
+                },
+                {
+                    "name": "Ex CTO Account",
+                    "sam": "ex_cto",
+                    "privileged_group": "Domain Admins"
+                },
+                {
+                    "name": "Old Sysadmin 2020",
+                    "sam": "old_sysadmin",
+                    "privileged_group": "Domain Admins"
+                }
+            ],
+            "finding": "FAIL - 3 disabled accounts found in privileged groups"
+        },
+        "log_validation": {
+            "passed": true,
+            "logs": {
+                "Security": {
+                    "accessible": true,
+                    "total_records": 9051
+                },
+                "System": {
+                    "accessible": false,
+                    "error": "(6, 'GetNumberOfEventLogRecords', 'The handle is invalid.')"
+                },
+                "Application": {
+                    "accessible": true,
+                    "total_records": 474
+                }
+            },
+            "finding": "PASS"
+        }
+    },
+    "summary": {
+        "total_controls": 4,
+        "passed": 1,
+        "failed": 3
+    }
+}
