@@ -1,5 +1,5 @@
 # ============================================================
-# SOCProbe v1.0 — Single-File Edition
+# SOCProbe v1.0
 # IAM Compliance Auditor for SMBs
 # Sheridan College INFO49402 — Group 23
 # Team: Syed Ahmed, Ahsan Siddiq, Vaqas Mirza
