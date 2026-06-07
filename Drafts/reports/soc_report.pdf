@@ -1,0 +1,560 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Length 7437 >> stream
+1 w
+0.100 0.250 0.380 RG
+0.100 0.250 0.380 rg
+48.00 680.00 516.00 60.00 re B
+BT
+/Helvetica-Bold 20 Tf
+1.000 1.000 1.000 rg
+64.00 714.00 Td
+(SOCProbe Assessment Report) Tj
+ET
+BT
+/Helvetica 10 Tf
+0.850 0.940 0.990 rg
+64.00 696.00 Td
+(SOCLab SMB) Tj
+ET
+1 w
+0.160 0.300 0.410 RG
+0.940 0.970 0.990 rg
+48.00 612.00 516.00 58.00 re B
+BT
+/Helvetica-Bold 9 Tf
+0.280 0.400 0.490 rg
+58.00 650.00 Td
+(Assessment Timestamp) Tj
+ET
+BT
+/Helvetica 9 Tf
+0.100 0.120 0.160 rg
+190.00 650.00 Td
+(2026-06-05T18:17:40.903193-07:00) Tj
+ET
+BT
+/Helvetica-Bold 9 Tf
+0.280 0.400 0.490 rg
+316.00 650.00 Td
+(Assessment Scope) Tj
+ET
+BT
+/Helvetica 9 Tf
+0.100 0.120 0.160 rg
+448.00 650.00 Td
+(single-company local Windows Server capstone deployment) Tj
+ET
+BT
+/Helvetica-Bold 9 Tf
+0.280 0.400 0.490 rg
+58.00 628.00 Td
+(Domain) Tj
+ET
+BT
+/Helvetica 9 Tf
+0.100 0.120 0.160 rg
+190.00 628.00 Td
+(soclab.local) Tj
+ET
+BT
+/Helvetica-Bold 9 Tf
+0.280 0.400 0.490 rg
+316.00 628.00 Td
+(Server) Tj
+ET
+BT
+/Helvetica 9 Tf
+0.100 0.120 0.160 rg
+448.00 628.00 Td
+(127.0.0.1:389) Tj
+ET
+BT
+/Helvetica-Bold 14 Tf
+0.060 0.230 0.360 rg
+48.00 594.00 Td
+(Score Summary) Tj
+ET
+1.2 w
+0.160 0.300 0.410 RG
+48.00 586.00 m 564.00 586.00 l S
+1 w
+0.160 0.300 0.410 RG
+0.940 0.970 0.990 rg
+48.00 520.00 516.00 58.00 re B
+BT
+/Helvetica-Bold 9 Tf
+0.280 0.400 0.490 rg
+58.00 558.00 Td
+(Readiness Score) Tj
+ET
+BT
+/Helvetica 9 Tf
+0.100 0.120 0.160 rg
+190.00 558.00 Td
+(55.0/100) Tj
+ET
+BT
+/Helvetica-Bold 9 Tf
+0.280 0.400 0.490 rg
+316.00 558.00 Td
+(Risk Tier) Tj
+ET
+BT
+/Helvetica 9 Tf
+0.100 0.120 0.160 rg
+448.00 558.00 Td
+(LOW) Tj
+ET
+BT
+/Helvetica-Bold 9 Tf
+0.280 0.400 0.490 rg
+58.00 536.00 Td
+(Passed Control Weight) Tj
+ET
+BT
+/Helvetica 9 Tf
+0.100 0.120 0.160 rg
+190.00 536.00 Td
+(55) Tj
+ET
+BT
+/Helvetica-Bold 9 Tf
+0.280 0.400 0.490 rg
+316.00 536.00 Td
+(Total Control Weight) Tj
+ET
+BT
+/Helvetica 9 Tf
+0.100 0.120 0.160 rg
+448.00 536.00 Td
+(100) Tj
+ET
+BT
+/Helvetica-Bold 14 Tf
+0.060 0.230 0.360 rg
+48.00 502.00 Td
+(Control Breakdown) Tj
+ET
+1.2 w
+0.160 0.300 0.410 RG
+48.00 494.00 m 564.00 494.00 l S
+1 w
+0.130 0.280 0.400 RG
+0.130 0.280 0.400 rg
+48.00 458.00 516.00 24.00 re B
+BT
+/Helvetica-Bold 9 Tf
+1.000 1.000 1.000 rg
+54.00 464.00 Td
+(Control) Tj
+ET
+BT
+/Helvetica-Bold 9 Tf
+1.000 1.000 1.000 rg
+199.00 464.00 Td
+(Weight) Tj
+ET
+BT
+/Helvetica-Bold 9 Tf
+1.000 1.000 1.000 rg
+259.00 464.00 Td
+(Status) Tj
+ET
+BT
+/Helvetica-Bold 9 Tf
+1.000 1.000 1.000 rg
+319.00 464.00 Td
+(Finding) Tj
+ET
+0.7 w
+0.840 0.890 0.930 RG
+0.970 0.980 0.990 rg
+48.00 422.00 516.00 32.00 re B
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+54.00 440.00 Td
+(Privileged Groups) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+193.00 422.00 m 193.00 454.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+199.00 440.00 Td
+(30) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+253.00 422.00 m 253.00 454.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+259.00 440.00 Td
+(FAIL) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+313.00 422.00 m 313.00 454.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+319.00 440.00 Td
+(FAIL - Domain Admins has 9 members \(max) Tj
+ET
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+319.00 429.00 Td
+(allowed 3\)) Tj
+ET
+0.7 w
+0.840 0.890 0.930 RG
+0.970 0.980 0.990 rg
+48.00 390.00 516.00 32.00 re B
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+54.00 408.00 Td
+(Stale Accounts) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+193.00 390.00 m 193.00 422.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+199.00 408.00 Td
+(25) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+253.00 390.00 m 253.00 422.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+259.00 408.00 Td
+(PASS) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+313.00 390.00 m 313.00 422.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+319.00 408.00 Td
+(PASS - No stale enabled user accounts were) Tj
+ET
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+319.00 397.00 Td
+(detected.) Tj
+ET
+0.7 w
+0.840 0.890 0.930 RG
+0.970 0.980 0.990 rg
+48.00 358.00 516.00 32.00 re B
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+54.00 376.00 Td
+(Disabled Accounts) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+193.00 358.00 m 193.00 390.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+199.00 376.00 Td
+(15) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+253.00 358.00 m 253.00 390.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+259.00 376.00 Td
+(FAIL) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+313.00 358.00 m 313.00 390.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+319.00 376.00 Td
+(FAIL - 3 disabled account\(s\) were found in) Tj
+ET
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+319.00 365.00 Td
+(privileged groups.) Tj
+ET
+0.7 w
+0.840 0.890 0.930 RG
+0.970 0.980 0.990 rg
+48.00 314.00 516.00 44.00 re B
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+54.00 344.00 Td
+(Log Validation) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+193.00 314.00 m 193.00 358.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+199.00 344.00 Td
+(30) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+253.00 314.00 m 253.00 358.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+259.00 344.00 Td
+(PASS) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+313.00 314.00 m 313.00 358.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+319.00 344.00 Td
+(PASS - Security log is accessible and) Tj
+ET
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+319.00 333.00 Td
+(produced useful recent telemetry with 250) Tj
+ET
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+319.00 322.00 Td
+(relevant events over the last 7 day\(s\).) Tj
+ET
+BT
+/Helvetica-Bold 14 Tf
+0.060 0.230 0.360 rg
+48.00 300.00 Td
+(Event Log Summary) Tj
+ET
+1.2 w
+0.160 0.300 0.410 RG
+48.00 292.00 m 564.00 292.00 l S
+1 w
+0.130 0.280 0.400 RG
+0.130 0.280 0.400 rg
+48.00 256.00 516.00 24.00 re B
+BT
+/Helvetica-Bold 9 Tf
+1.000 1.000 1.000 rg
+54.00 262.00 Td
+(Event Category) Tj
+ET
+BT
+/Helvetica-Bold 9 Tf
+1.000 1.000 1.000 rg
+460.00 262.00 Td
+(Count) Tj
+ET
+0.7 w
+0.840 0.890 0.930 RG
+0.970 0.980 0.990 rg
+48.00 230.00 516.00 22.00 re B
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+54.00 238.00 Td
+(Successful logons) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+454.00 230.00 m 454.00 252.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+460.00 238.00 Td
+(250) Tj
+ET
+0.7 w
+0.840 0.890 0.930 RG
+0.970 0.980 0.990 rg
+48.00 208.00 516.00 22.00 re B
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+54.00 216.00 Td
+(Failed logons) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+454.00 208.00 m 454.00 230.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+460.00 216.00 Td
+(0) Tj
+ET
+0.7 w
+0.840 0.890 0.930 RG
+0.970 0.980 0.990 rg
+48.00 186.00 516.00 22.00 re B
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+54.00 194.00 Td
+(Lockouts) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+454.00 186.00 m 454.00 208.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+460.00 194.00 Td
+(0) Tj
+ET
+0.7 w
+0.840 0.890 0.930 RG
+0.970 0.980 0.990 rg
+48.00 164.00 516.00 22.00 re B
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+54.00 172.00 Td
+(Account changes) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+454.00 164.00 m 454.00 186.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+460.00 172.00 Td
+(0) Tj
+ET
+0.7 w
+0.840 0.890 0.930 RG
+0.970 0.980 0.990 rg
+48.00 142.00 516.00 22.00 re B
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+54.00 150.00 Td
+(Group membership changes) Tj
+ET
+0.5 w
+0.860 0.900 0.940 RG
+454.00 142.00 m 454.00 164.00 l S
+BT
+/Helvetica 8 Tf
+0.100 0.120 0.160 rg
+460.00 150.00 Td
+(0) Tj
+ET
+BT
+/Helvetica-Bold 14 Tf
+0.060 0.230 0.360 rg
+48.00 128.00 Td
+(Top Risks) Tj
+ET
+1.2 w
+0.160 0.300 0.410 RG
+48.00 120.00 m 564.00 120.00 l S
+BT
+/Helvetica 10 Tf
+0.100 0.120 0.160 rg
+48.00 102.00 Td
+([HIGH] FAIL - Domain Admins has 9 members \(max allowed 3\)) Tj
+ET
+BT
+/Helvetica 10 Tf
+0.100 0.120 0.160 rg
+48.00 84.00 Td
+([HIGH] FAIL - 3 disabled account\(s\) were found in privileged groups.) Tj
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 7 0 R /MediaBox [0 0 612 792] /Resources << /Font << /Helvetica 1 0 R /Helvetica-Bold 2 0 R >> >> /Contents 3 0 R >>
+endobj
+5 0 obj
+<< /Length 614 >> stream
+BT
+/Helvetica-Bold 14 Tf
+0.060 0.230 0.360 rg
+48.00 738.00 Td
+(Recommended Actions) Tj
+ET
+1.2 w
+0.160 0.300 0.410 RG
+48.00 730.00 m 564.00 730.00 l S
+BT
+/Helvetica 10 Tf
+0.100 0.120 0.160 rg
+48.00 712.00 Td
+([HIGH] Reduce Domain Admin membership to the configured threshold of 3 and review) Tj
+ET
+BT
+/Helvetica 10 Tf
+0.100 0.120 0.160 rg
+48.00 698.00 Td
+(standing privileged access.) Tj
+ET
+BT
+/Helvetica 10 Tf
+0.100 0.120 0.160 rg
+48.00 680.00 Td
+([HIGH] Remove disabled identities from privileged groups and confirm access was fully) Tj
+ET
+BT
+/Helvetica 10 Tf
+0.100 0.120 0.160 rg
+48.00 666.00 Td
+(revoked.) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 7 0 R /MediaBox [0 0 612 792] /Resources << /Font << /Helvetica 1 0 R /Helvetica-Bold 2 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Type /Pages /Kids [4 0 R 6 0 R] /Count 2 >>
+endobj
+8 0 obj
+<< /Type /Catalog /Pages 7 0 R >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000009 00000 n 
+0000000079 00000 n 
+0000000154 00000 n 
+0000007643 00000 n 
+0000007798 00000 n 
+0000008463 00000 n 
+0000008618 00000 n 
+0000008681 00000 n 
+trailer << /Size 9 /Root 8 0 R >>
+startxref
+8730
+%%EOF
