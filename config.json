@@ -13,8 +13,9 @@
     "password": "Capstone@1"
   },
   "thresholds": {
-    "stale_account_days": 90,
+    "stale_account_days": 45,
     "max_domain_admins": 3,
+    "max_failed_logons_24h": 5,
     "security_log_lookback_days": 7,
     "security_log_max_events": 250
   },
@@ -25,13 +26,15 @@
     "Enterprise Admins"
   ],
   "weights": {
-    "privileged_groups": 30,
-    "stale_accounts": 25,
-    "disabled_accounts": 15,
-    "log_validation": 30
+    "privileged_groups": 25,
+    "stale_accounts": 20,
+    "disabled_accounts": 10,
+    "log_validation": 20
   },
   "output": {
     "report_path": "reports\\soc_report.json",
-    "pdf_report_path": "reports\\soc_report.pdf"
+    "pdf_report_path": "reports\\soc_report.pdf",
+    "html_report_path": "reports\\soc_report.html",
+    "history_path": "reports\\soc_score_history.json"
   }
 }
