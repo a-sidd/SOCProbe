@@ -5,6 +5,9 @@ import json
 import webbrowser
 from datetime import datetime
 import os
+import urllib.request
+import urllib.parse
+import urllib.error
 
 APP_VERSION = "SOCProbe UI v6.4 - Polished Professor Demo Dashboard"
 
@@ -953,6 +956,280 @@ Group Memberships:
 
 
 # =========================
+# ENTRA ID VIEW (Microsoft Graph)
+# Reads cloud accounts via the Graph API using OAuth2 client-credentials.
+# Standard /users, /groups and /directoryRoles reads are free on Entra ID Free.
+# NOTE: user sign-in activity (last logon) requires Entra ID P1 and is NOT read here.
+# =========================
+
+ENTRA_CONFIG_FILE = "entra_config.json"
+
+# Directory roles treated as privileged for highlighting purposes
+GRAPH_PRIVILEGED_ROLES = {
+    "Global Administrator",
+    "Privileged Role Administrator",
+    "Privileged Authentication Administrator",
+    "Security Administrator",
+    "User Administrator",
+    "Application Administrator",
+    "Cloud Application Administrator",
+    "Exchange Administrator",
+    "SharePoint Administrator",
+    "Helpdesk Administrator",
+}
+
+
+def load_entra_config():
+    if os.path.exists(ENTRA_CONFIG_FILE):
+        try:
+            with open(ENTRA_CONFIG_FILE) as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+
+def get_entra_token(tenant_id, client_id, client_secret):
+    """Client-credentials OAuth2 flow -> app-only access token for Graph."""
+    url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
+    data = urllib.parse.urlencode({
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "scope": "https://graph.microsoft.com/.default",
+        "grant_type": "client_credentials",
+    }).encode()
+    req = urllib.request.Request(url, data=data, method="POST")
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        body = json.loads(resp.read().decode())
+    return body.get("access_token")
+
+
+def graph_get(url, token):
+    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read().decode())
+
+
+def get_entra_users(token):
+    """Return all users (handles paging). Free-tier safe property set."""
+    users = []
+    url = ("https://graph.microsoft.com/v1.0/users"
+           "?$select=displayName,userPrincipalName,accountEnabled,id,createdDateTime"
+           "&$top=100")
+    while url:
+        data = graph_get(url, token)
+        users.extend(data.get("value", []))
+        url = data.get("@odata.nextLink")
+    return users
+
+
+def get_entra_privileged_members(token):
+    """Map user id -> list of privileged role display names currently assigned.
+    Requires Directory.Read.All (or RoleManagement.Read.Directory)."""
+    priv_ids = {}
+    try:
+        roles = graph_get("https://graph.microsoft.com/v1.0/directoryRoles", token).get("value", [])
+        for role in roles:
+            rid = role.get("id")
+            rname = role.get("displayName", "")
+            if not rid:
+                continue
+            try:
+                members = graph_get(
+                    f"https://graph.microsoft.com/v1.0/directoryRoles/{rid}/members", token
+                ).get("value", [])
+            except Exception:
+                members = []
+            for m in members:
+                priv_ids.setdefault(m.get("id"), []).append(rname)
+    except Exception:
+        pass
+    return priv_ids
+
+
+def show_entra_view():
+    """Window that authenticates to Microsoft Graph and lists Entra ID users."""
+    cfg = load_entra_config()
+
+    win = tk.Toplevel(root)
+    win.title("Entra ID - Cloud Accounts (Microsoft Graph)")
+    win.geometry("1180x740")
+    win.configure(bg=BG)
+    win.minsize(960, 620)
+
+    # Header
+    head = tk.Frame(win, bg=BG)
+    head.pack(fill="x", padx=20, pady=(16, 6))
+    tk.Label(head, text="Entra ID Cloud Accounts", font=("Segoe UI", 18, "bold"), fg=TEXT, bg=BG).pack(side="left")
+    status_label = tk.Label(head, text="Not connected", font=("Segoe UI", 9), fg=MUTED, bg=BG)
+    status_label.pack(side="right")
+
+    # App / credentials config
+    cfg_frame = tk.LabelFrame(
+        win, text=" Microsoft Graph App (OAuth2 client credentials) ",
+        fg=YELLOW, bg=BG, font=("Segoe UI", 9, "bold")
+    )
+    cfg_frame.pack(fill="x", padx=20, pady=(0, 8))
+
+    def field(label, default="", show=None):
+        row = tk.Frame(cfg_frame, bg=BG)
+        row.pack(fill="x", padx=8, pady=3)
+        tk.Label(row, text=label, width=14, anchor="w", bg=BG, fg=MUTED, font=("Segoe UI", 9)).pack(side="left")
+        var = tk.StringVar(value=default)
+        entry = tk.Entry(row, textvariable=var, bg=PANEL, fg=TEXT, insertbackground="white",
+                         font=("Consolas", 9), bd=0, show=show)
+        entry.pack(side="left", fill="x", expand=True, ipady=3)
+        return var
+
+    tenant_var = field("Tenant ID:", cfg.get("tenant_id", ""))
+    client_var = field("Client ID:", cfg.get("client_id", ""))
+    secret_var = field("Client Secret:", cfg.get("client_secret", ""), show="*")
+
+    opts_row = tk.Frame(cfg_frame, bg=BG)
+    opts_row.pack(fill="x", padx=8, pady=(2, 6))
+    save_var = tk.BooleanVar(value=bool(cfg))
+    tk.Checkbutton(
+        opts_row, text="Save credentials to entra_config.json (add to .gitignore)",
+        variable=save_var, bg=BG, fg=TEXT, selectcolor=PANEL_2,
+        activebackground=BG, activeforeground=TEXT, font=("Segoe UI", 8)
+    ).pack(side="left")
+
+    # Summary cards
+    summary_bar = tk.Frame(win, bg=BG)
+    summary_bar.pack(fill="x", padx=20, pady=(0, 8))
+    total_lbl = card(summary_bar, "Total Users", "0", PURPLE_SOFT, width=200)
+    enabled_lbl = card(summary_bar, "Enabled", "0", GREEN, width=170)
+    disabled_lbl = card(summary_bar, "Disabled", "0", RED, width=170)
+    priv_lbl = card(summary_bar, "Privileged", "0", YELLOW, width=170)
+
+    # Table
+    table_wrap = tk.Frame(win, bg=PANEL, highlightbackground=BORDER, highlightthickness=1)
+    table_wrap.pack(fill="both", expand=True, padx=20, pady=(0, 6))
+
+    entra_style = ttk.Style()
+    entra_style.configure("Entra.Treeview", rowheight=30, background=PANEL,
+                          fieldbackground=PANEL, foreground="#e5e7eb", borderwidth=0,
+                          font=("Segoe UI", 10))
+
+    cols = ("User Principal Name", "Display Name", "Enabled", "Created", "Privileged Roles")
+    tree = ttk.Treeview(table_wrap, columns=cols, show="headings", style="Entra.Treeview")
+    for c in cols:
+        tree.heading(c, text=c)
+    tree.column("User Principal Name", width=300)
+    tree.column("Display Name", width=200)
+    tree.column("Enabled", width=80, anchor="center")
+    tree.column("Created", width=110, anchor="center")
+    tree.column("Privileged Roles", width=320)
+
+    tree.tag_configure("privileged", background="#3b1022", foreground="#fecaca")
+    tree.tag_configure("disabled", background="#1f2937", foreground="#9ca3af")
+
+    vsb = ttk.Scrollbar(table_wrap, orient="vertical", command=tree.yview)
+    tree.configure(yscrollcommand=vsb.set)
+    vsb.pack(side="right", fill="y")
+    tree.pack(side="left", fill="both", expand=True, padx=8, pady=8)
+
+    note = tk.Label(
+        win,
+        text=("Reads /users and /directoryRoles via Microsoft Graph (free tier). "
+              "Requires the Directory.Read.All application permission + admin consent. "
+              "Last sign-in / risky sign-in data requires Entra ID P1."),
+        fg="#9ca3af", bg=BG, font=("Segoe UI", 8), wraplength=1120, justify="left"
+    )
+    note.pack(fill="x", padx=20, pady=(0, 8))
+
+    def fetch():
+        tenant = tenant_var.get().strip()
+        cid = client_var.get().strip()
+        sec = secret_var.get().strip()
+        if not (tenant and cid and sec):
+            messagebox.showwarning("Missing Config", "Enter Tenant ID, Client ID, and Client Secret.")
+            return
+
+        status_label.config(text="Connecting to Microsoft Graph...")
+        win.update_idletasks()
+
+        try:
+            token = get_entra_token(tenant, cid, sec)
+            if not token:
+                status_label.config(text="Authentication failed")
+                messagebox.showerror("Auth Error", "No access token returned. Check the credentials.")
+                return
+            users = get_entra_users(token)
+            priv = get_entra_privileged_members(token)
+        except urllib.error.HTTPError as e:
+            try:
+                detail = e.read().decode()
+            except Exception:
+                detail = ""
+            status_label.config(text="Graph error")
+            messagebox.showerror("Graph Error", f"{e.code} {e.reason}\n\n{detail[:900]}")
+            return
+        except Exception as e:
+            status_label.config(text="Connection error")
+            messagebox.showerror("Connection Error", str(e))
+            return
+
+        if save_var.get():
+            try:
+                with open(ENTRA_CONFIG_FILE, "w") as f:
+                    json.dump({"tenant_id": tenant, "client_id": cid, "client_secret": sec}, f, indent=2)
+            except Exception:
+                pass
+
+        for item in tree.get_children():
+            tree.delete(item)
+
+        total = enabled = disabled = privc = 0
+        for u in users:
+            total += 1
+            roles = priv.get(u.get("id"), [])
+            is_priv = bool(roles)
+            en = bool(u.get("accountEnabled", False))
+            created = (u.get("createdDateTime") or "")[:10] or "Unknown"
+
+            tags = []
+            if is_priv:
+                tags.append("privileged")
+                privc += 1
+            if en:
+                enabled += 1
+            else:
+                tags.append("disabled")
+                disabled += 1
+
+            tree.insert(
+                "", tk.END,
+                values=(
+                    u.get("userPrincipalName", ""),
+                    u.get("displayName", ""),
+                    "Yes" if en else "No",
+                    created,
+                    "; ".join(roles),
+                ),
+                tags=tuple(tags)
+            )
+
+        total_lbl.config(text=str(total))
+        enabled_lbl.config(text=str(enabled))
+        disabled_lbl.config(text=str(disabled))
+        priv_lbl.config(text=str(privc))
+        status_label.config(text=f"Connected - {total} users via Microsoft Graph")
+
+    btns = tk.Frame(win, bg=BG)
+    btns.pack(fill="x", padx=20, pady=(0, 14))
+    tk.Button(
+        btns, text="Connect and Fetch Users", command=fetch,
+        bg=PURPLE, fg="white", activebackground=PURPLE_SOFT, activeforeground="white",
+        font=("Segoe UI", 9, "bold"), padx=14, pady=7, bd=0, cursor="hand2"
+    ).pack(side="left")
+    tk.Label(
+        btns, text="Red = privileged role   |   Grey = disabled account",
+        fg="#9ca3af", bg=BG, font=("Segoe UI", 8)
+    ).pack(side="right")
+
+
+# =========================
 # PROFESSOR DEMO MODE
 # No AD changes. Uses simulated reports only.
 # =========================
@@ -1219,11 +1496,7 @@ def make_tab(parent, text, command, active=False):
 
 make_tab(tabs_frame, "Account Security", None, active=True)
 make_tab(tabs_frame, "Accounts", show_accounts_view)
-make_tab(
-    tabs_frame,
-    "Entra ID",
-    lambda: messagebox.showinfo("Entra ID", "Entra ID assessment module is not implemented in this prototype.")
-)
+make_tab(tabs_frame, "Entra ID", show_entra_view)
 
 # ---------- Options ----------
 options_frame = tk.LabelFrame(
