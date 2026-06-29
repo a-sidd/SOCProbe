@@ -9,7 +9,7 @@ import urllib.request
 import urllib.parse
 import urllib.error
 
-APP_VERSION = "SOCProbe UI v6.4 - Polished Professor Demo Dashboard"
+APP_VERSION = "SOCProbe UI v6.4 - Demo Dashboard"
 
 REQUIRED_EVENT_IDS = [4624, 4625, 4648, 4720, 4728, 4776]
 
