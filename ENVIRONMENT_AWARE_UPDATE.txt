@@ -1,0 +1,10 @@
+SOCProbe Enterprise v4.2 - Environment-Aware Assessment Update
+
+Changes:
+- Local Windows controls run on Windows hosts.
+- Active Directory readiness controls always run.
+- Active Directory security controls run only when the host is domain joined and the AD PowerShell module is available.
+- Microsoft Entra controls run only when Entra configuration is present.
+- Irrelevant controls are marked NOT APPLICABLE and excluded from scoring.
+- Controls disabled in the methodology remain NOT ASSESSED and are excluded from scoring.
+- Detected environment details are stored in system_context.AssessmentEnvironment.

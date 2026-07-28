@@ -1,6 +1,0 @@
-from socprobe_desktop import launch_app
-
-
-if __name__ == "__main__":
-    launch_app()
-    raise SystemExit

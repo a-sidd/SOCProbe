@@ -1,35 +1,6 @@
-# Secrets / local config
-config.json
-
-# Generated reports
-reports/*.json
-reports/*.pdf
-reports/*.tmp
-
-# Python cache
+entra_config.json
+socprobe.db
 __pycache__/
-*/__pycache__/
 *.pyc
-*.pyo
-*.pyd
-
-# Virtual environments
-venv/
-venv*/
-.venv/
-.env
-.env/
-
-# Editor settings
-.vscode/
-.idea/
-
-# Windows / OS junk
-Thumbs.db
-Desktop.ini
-
-# Local runtime / packaging artifacts
-build/
-dist/
-*.spec
-*.spec.bak
+socprobe_saf_real_assessment.json
+socprobe_saf_real_report.html

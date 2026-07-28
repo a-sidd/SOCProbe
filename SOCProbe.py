@@ -4,7 +4,6 @@ from tkinter import ttk, messagebox
 import webbrowser
 import os
 import math
-import shutil
 import threading
 from datetime import datetime
 
@@ -14,6 +13,7 @@ from database.repository import initialize_database, get_active_profile
 from framework.saf_controls import SAF_CONTROLS
 from ui.profile_manager import ProfileManager
 from ui.control_library import ControlLibraryManager
+from ui.entra_config import EntraConfigDialog
 
 APP_VERSION = "SOCProbe Enterprise v4.2 - Responsive Assessment Console"
 
@@ -128,11 +128,15 @@ def draw_card_icon(canvas, kind, color):
 def draw_gauge(score=0):
     gauge.delete("all")
 
-    width = max(gauge.winfo_width(), 380)
-    height = max(gauge.winfo_height(), 220)
+    width = gauge.winfo_width()
+    height = gauge.winfo_height()
+    if width <= 1:
+        width = int(gauge.cget("width") or 380)
+    if height <= 1:
+        height = int(gauge.cget("height") or 220)
     cx = width / 2
-    cy = height * 0.72
-    radius = min(width * 0.34, height * 0.48)
+    cy = height * 0.70
+    radius = min(width * 0.34, height * 0.43)
 
     gauge.create_text(
         16, 15,
@@ -185,28 +189,35 @@ def draw_gauge(score=0):
         font=("Segoe UI", 14),
     )
 
-    legend_y = height - 20
     legend = [
         ("0–49 Critical", RED),
         ("50–69 High Risk", ORANGE),
-        ("70–89 Needs Improvement", YELLOW),
+        ("70–89 Improve", YELLOW),
         ("90–100 Excellent", GREEN),
     ]
-    segment = width / 4
+
+    columns = 2 if width < 470 else 4
+    rows = 2 if columns == 2 else 1
+    item_width = width / columns
+    first_y = height - (34 if rows == 2 else 20)
 
     for index, (label, color) in enumerate(legend):
-        x_pos = 10 + segment * index
+        row = index // columns
+        column = index % columns
+        x_pos = 10 + item_width * column
+        y_pos = first_y + row * 16
+
         gauge.create_rectangle(
             x_pos,
-            legend_y - 7,
+            y_pos - 7,
             x_pos + 8,
-            legend_y + 1,
+            y_pos + 1,
             fill=color,
             outline="",
         )
         gauge.create_text(
             x_pos + 13,
-            legend_y - 3,
+            y_pos - 3,
             text=label,
             fill=MUTED,
             font=("Segoe UI", 6),
@@ -217,9 +228,12 @@ def draw_gauge(score=0):
 def draw_domain_bars(report):
     domain_canvas.delete("all")
 
-    width = max(domain_canvas.winfo_width(), 420)
-    bar_x = int(width * 0.45)
-    bar_width = max(120, int(width * 0.36))
+    width = domain_canvas.winfo_width()
+    if width <= 1:
+        width = int(domain_canvas.cget("width") or 420)
+    bar_x = int(width * 0.48)
+    score_space = 38
+    bar_width = max(90, width - bar_x - score_space - 16)
 
     domain_canvas.create_text(
         16,
@@ -230,7 +244,7 @@ def draw_domain_bars(report):
         anchor="nw",
     )
 
-    y = 55
+    y = 60
 
     for domain, data in report["domain_scores"].items():
         score = data.get("score")
@@ -241,9 +255,9 @@ def draw_domain_bars(report):
             y + 8,
             text=domain,
             fill=TEXT_2,
-            font=("Segoe UI", 8, "bold"),
+            font=("Segoe UI", 7, "bold"),
             anchor="w",
-            width=bar_x - 28,
+            width=max(105, bar_x - 24),
         )
 
         domain_canvas.create_rectangle(
@@ -272,12 +286,12 @@ def draw_domain_bars(report):
             font=("Segoe UI", 8, "bold"),
             anchor="w",
         )
-        y += 37
+        y += 42
 
     domain_canvas.create_text(
         16,
         max(y + 6, 205),
-        text="Only enabled and assessed controls are included in scoring.",
+        text="Only enabled and assessed controls are scored.",
         fill=MUTED,
         font=("Segoe UI", 7),
         anchor="w",
@@ -287,72 +301,88 @@ def draw_domain_bars(report):
 def draw_methodology(report):
     method_canvas.delete("all")
 
-    width = max(method_canvas.winfo_width(), 420)
+    width = method_canvas.winfo_width()
+    height = method_canvas.winfo_height()
+
+    if width <= 1:
+        width = int(method_canvas.cget("width") or 360)
+    if height <= 1:
+        height = int(method_canvas.cget("height") or 235)
 
     method_canvas.create_text(
-        16,
-        15,
+        14,
+        13,
         text="SAF ASSESSMENT WORKFLOW",
         fill=TEXT,
-        font=("Segoe UI", 11, "bold"),
+        font=("Segoe UI", 10, "bold"),
         anchor="nw",
     )
 
     steps = [
-        ("1", "Collect Evidence", "Gather system\nevidence", "database"),
-        ("2", "Evaluate Controls", "Apply rules and\nthresholds", "clipboard"),
-        ("3", "Assess Risk", "Calculate weighted\nscores", "bars"),
-        ("4", "Generate Results", "Create reports and\nrecommendations", "report"),
+        ("1", "Collect", "Evidence", "database"),
+        ("2", "Evaluate", "Controls", "clipboard"),
+        ("3", "Assess", "Risk", "bars"),
+        ("4", "Generate", "Results", "report"),
     ]
 
-    available = width - 34
-    spacing = available / 4
-    center_y = 95
+    margin = 12
+    usable_width = max(240, width - margin * 2)
+    spacing = usable_width / 4
+    center_y = max(75, min(92, height * 0.40))
+    radius = max(18, min(23, spacing * 0.23))
 
     for index, (number, title, subtitle, kind) in enumerate(steps):
-        center_x = 17 + spacing * index + spacing / 2
+        center_x = margin + spacing * index + spacing / 2
 
         method_canvas.create_oval(
-            center_x - 27,
-            center_y - 27,
-            center_x + 27,
-            center_y + 27,
+            center_x - radius,
+            center_y - radius,
+            center_x + radius,
+            center_y + radius,
             fill=BLUE_2,
             outline=CYAN,
             width=2,
         )
-        method_canvas.create_text(
-            center_x,
-            center_y - 13,
-            text=number,
-            fill=TEXT,
-            font=("Segoe UI", 7, "bold"),
-        )
-        draw_workflow_icon(method_canvas, center_x, center_y + 5, kind)
 
         method_canvas.create_text(
             center_x,
-            center_y + 48,
+            center_y - radius * 0.48,
+            text=number,
+            fill=TEXT,
+            font=("Segoe UI", 6, "bold"),
+        )
+
+        draw_workflow_icon(
+            method_canvas,
+            center_x,
+            center_y + 4,
+            kind,
+        )
+
+        method_canvas.create_text(
+            center_x,
+            center_y + radius + 25,
             text=title,
             fill=TEXT_2,
             font=("Segoe UI", 7, "bold"),
-            width=max(80, spacing - 8),
+            width=max(55, spacing - 5),
         )
+
         method_canvas.create_text(
             center_x,
-            center_y + 72,
+            center_y + radius + 42,
             text=subtitle,
             fill=MUTED,
             font=("Segoe UI", 6),
-            width=max(80, spacing - 8),
+            width=max(55, spacing - 5),
         )
 
         if index < len(steps) - 1:
-            next_x = 17 + spacing * (index + 1) + spacing / 2
+            next_x = margin + spacing * (index + 1) + spacing / 2
             method_canvas.create_line(
-                center_x + 32,
+                center_x + radius + 4,
                 center_y,
-                next_x - 32,
+                next_x - radius - 4,
                 center_y,
                 fill=MUTED,
                 width=2,
@@ -364,6 +394,8 @@ def result_text(result):
         return "Compliant"
     if result["status"] == "NOT ASSESSED":
         return "Not Assessed"
+    if result["status"] == "NOT APPLICABLE":
+        return "Not Applicable"
 
     evidence = result.get("evidence", "")
     if len(evidence) > 44:
@@ -415,15 +447,34 @@ def populate_results(report):
     )
 
 
+def _recolor_sidebar_item(widget, background, title_color):
+    try:
+        widget.configure(bg=background)
+    except tk.TclError:
+        pass
+
+    for child in widget.winfo_children():
+        try:
+            child.configure(bg=background)
+            if isinstance(child, tk.Label):
+                current_text = child.cget("text")
+                if current_text and len(current_text) > 2:
+                    child.configure(fg=title_color)
+        except tk.TclError:
+            pass
+        _recolor_sidebar_item(child, background, title_color)
+
+
 def filter_domain(domain):
     global current_domain_filter
     current_domain_filter = domain
 
     for name, button in domain_buttons.items():
         active = name == domain
-        button.config(
-            bg=BLUE if active else SIDEBAR,
-            fg=TEXT if active else TEXT_2,
+        _recolor_sidebar_item(
+            button,
+            BLUE if active else SIDEBAR,
+            TEXT if active else TEXT_2,
         )
 
     if current_report:
@@ -441,12 +492,21 @@ def update_summary(report):
         f"{report['total_controls']} controls.\n\n"
         f"● {report['failed_controls']} controls failed and require attention.\n"
         f"● {report['not_assessed_controls']} controls were not assessed.\n"
+        f"● {report.get('not_applicable_controls', 0)} controls were not applicable.\n"
         f"● {report['passed_controls']} controls passed.\n\n"
         f"Overall posture: {report['readiness'].upper()}."
     )
 
     summary_text.insert("1.0", content)
     summary_text.config(state="disabled")
+
+
+def redraw_visuals(event=None):
+    if not current_report:
+        return
+    draw_gauge(current_report["overall_score"])
+    draw_domain_bars(current_report)
+    draw_methodology(current_report)
 
 
 def load_report(report):
@@ -496,7 +556,10 @@ def load_report(report):
         fg=RED,
     )
     failed_sub.config(
-        text=f"{report['not_assessed_controls']} Not Assessed"
+        text=(
+            f"{report['not_assessed_controls']} Not Assessed • "
+            f"{report.get('not_applicable_controls', 0)} N/A"
+        )
     )
 
     mode_label.config(
@@ -506,8 +569,12 @@ def load_report(report):
         text=f"Active Methodology: {report['active_profile']}"
     )
     sidebar_profile_name.config(text=report["active_profile"])
+    sidebar_profile_updated.config(
+        text="Last Updated: " + datetime.now().strftime("%b %d, %Y %I:%M %p")
+    )
 
     update_summary(report)
+    root.update_idletasks()
     draw_gauge(score)
     draw_domain_bars(report)
     draw_methodology(report)
@@ -523,7 +590,10 @@ def load_report(report):
 
 def progress_update(current, total, message):
     percentage = int((current / total) * 100) if total else 0
+
     root.after(0, lambda: progress_var.set(percentage))
+    root.after(0, lambda: progress_percent_label.config(text=f"{percentage}%"))
+    root.after(0, lambda: progress_stage_label.config(text=message))
     root.after(0, lambda: activity_label.config(text=message))
 
 
@@ -555,13 +625,38 @@ def assessment_worker(mode, scenario=None):
                 text="Assessment failed."
             ),
         )
+        root.after(
+            0,
+            lambda: progress_stage_label.config(
+                text="Assessment failed"
+            ),
+        )
 
     finally:
-        root.after(0, lambda: progress_var.set(0))
+        def finish_assessment():
+            progress_var.set(100)
+            progress_percent_label.config(text="100%")
+            progress_stage_label.config(text="Assessment completed")
+            start_button.config(
+                text="START DEFAULT ASSESSMENT",
+                state="normal",
+                bg="#C62828",
+            )
+
+        root.after(0, finish_assessment)
 
 
 def run_real():
     mode_label.config(text="Assessment Mode: Real Assessment")
+    progress_var.set(0)
+    progress_percent_label.config(text="0%")
+    progress_stage_label.config(text="Initializing assessment...")
+    start_button.config(
+        text="ASSESSMENT IN PROGRESS...",
+        state="disabled",
+        bg="#7F1D1D",
+    )
+
     threading.Thread(
         target=assessment_worker,
         args=("real",),
@@ -630,20 +725,7 @@ def open_control_library():
 
 
 def open_entra_config():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    target = os.path.join(base_dir, "entra_config.json")
-    example = os.path.join(base_dir, "entra_config.example.json")
-
-    if not os.path.exists(target) and os.path.exists(example):
-        shutil.copyfile(example, target)
-
-    if os.path.exists(target):
-        os.startfile(target)
-    else:
-        messagebox.showerror(
-            "Missing File",
-            "entra_config.example.json was not found.",
-        )
+    EntraConfigDialog(root, on_change=update_profile_label)
 
 
 def on_result_click(event):
@@ -689,8 +771,20 @@ def on_result_click(event):
 # ---------------- Root and styles ----------------
 root = tk.Tk()
 root.title(APP_VERSION)
-root.geometry("1680x960")
-root.minsize(1280, 760)
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+
+window_width = min(1600, max(1180, screen_width - 30))
+window_height = min(900, max(720, screen_height - 80))
+
+root.geometry(f"{window_width}x{window_height}")
+root.minsize(1180, 700)
+
+# Maximize automatically on Windows while preserving a safe fallback.
+try:
+    root.state("zoomed")
+except tk.TclError:
+    pass
 root.configure(bg=BG)
 
 style = ttk.Style()
@@ -738,7 +832,7 @@ shell.grid_rowconfigure(0, weight=1)
 sidebar = tk.Frame(
     shell,
     bg=SIDEBAR,
-    width=245,
+    width=225,
 )
 sidebar.grid(
     row=0,
@@ -747,23 +841,59 @@ sidebar.grid(
 )
 sidebar.grid_propagate(False)
 
+# Brand area
 brand = tk.Frame(sidebar, bg=SIDEBAR)
 brand.pack(
     fill="x",
-    padx=16,
+    padx=10,
     pady=(18, 10),
 )
 
+logo_row = tk.Frame(brand, bg=SIDEBAR)
+logo_row.pack(fill="x")
+
+logo_canvas = tk.Canvas(
+    logo_row,
+    width=42,
+    height=42,
+    bg=SIDEBAR,
+    highlightthickness=0,
+)
+logo_canvas.pack(side="left", padx=(0, 8))
+
+# Shield-style SOCProbe logo
+logo_canvas.create_polygon(
+    24, 4,
+    40, 10,
+    38, 31,
+    24, 43,
+    10, 31,
+    8, 10,
+    fill="#0B2A48",
+    outline=CYAN,
+    width=3,
+)
+logo_canvas.create_line(
+    16, 23,
+    22, 29,
+    33, 16,
+    fill=CYAN,
+    width=3,
+)
+
+brand_text = tk.Frame(logo_row, bg=SIDEBAR)
+brand_text.pack(side="left", fill="x", expand=True)
+
 tk.Label(
-    brand,
+    brand_text,
     text="SOCProbe",
     bg=SIDEBAR,
     fg=TEXT,
-    font=("Segoe UI", 23, "bold"),
+    font=("Segoe UI", 16, "bold"),
 ).pack(anchor="w")
 
 tk.Label(
-    brand,
+    brand_text,
     text="SAF ASSESSMENT CONSOLE",
     bg=SIDEBAR,
     fg=CYAN,
@@ -771,198 +901,229 @@ tk.Label(
 ).pack(anchor="w")
 
 tk.Label(
-    brand,
+    brand_text,
     text="Enterprise v4.2",
     bg=SIDEBAR,
     fg=MUTED,
     font=("Segoe UI", 7),
 ).pack(anchor="w", pady=(3, 0))
 
-tk.Frame(
-    sidebar,
-    bg=BORDER,
-    height=1,
-).pack(
-    fill="x",
-    padx=14,
-    pady=10,
+def sidebar_divider():
+    tk.Frame(
+        sidebar,
+        bg=BORDER,
+        height=1,
+    ).pack(
+        fill="x",
+        padx=10,
+        pady=10,
+    )
+
+def sidebar_heading(text):
+    tk.Label(
+        sidebar,
+        text=text,
+        bg=SIDEBAR,
+        fg=MUTED,
+        font=("Segoe UI", 7, "bold"),
+    ).pack(
+        anchor="w",
+        padx=10,
+        pady=(0, 4),
+    )
+
+def sidebar_item(
+    title,
+    command,
+    subtitle="",
+    icon="•",
+    active=False,
+):
+    bg = BLUE if active else SIDEBAR
+    active_bg = BLUE_2 if active else SURFACE_3
+
+    item = tk.Frame(
+        sidebar,
+        bg=bg,
+        cursor="hand2",
+    )
+    item.pack(
+        fill="x",
+        padx=10 if active else 8,
+        pady=1,
+    )
+
+    icon_label = tk.Label(
+        item,
+        text=icon,
+        bg=bg,
+        fg=TEXT if active else CYAN,
+        font=("Segoe UI Symbol", 11, "bold"),
+        width=2,
+        anchor="center",
+    )
+    icon_label.pack(
+        side="left",
+        padx=(8, 4),
+        pady=7,
+    )
+
+    labels = tk.Frame(item, bg=bg)
+    labels.pack(
+        side="left",
+        fill="x",
+        expand=True,
+        pady=6,
+    )
+
+    title_label = tk.Label(
+        labels,
+        text=title,
+        bg=bg,
+        fg=TEXT if active else TEXT_2,
+        font=("Segoe UI", 8, "bold"),
+        anchor="w",
+    )
+    title_label.pack(anchor="w")
+
+    subtitle_label = None
+    if subtitle:
+        subtitle_label = tk.Label(
+            labels,
+            text=subtitle,
+            bg=bg,
+            fg="#C8D3E1" if active else MUTED,
+            font=("Segoe UI", 6),
+            anchor="w",
+        )
+        subtitle_label.pack(anchor="w", pady=(1, 0))
+
+    widgets = [item, icon_label, labels, title_label]
+    if subtitle_label:
+        widgets.append(subtitle_label)
+
+    def invoke(event=None):
+        command()
+
+    def enter(event=None):
+        if not active:
+            for widget in widgets:
+                widget.configure(bg=active_bg)
+
+    def leave(event=None):
+        if not active:
+            for widget in widgets:
+                widget.configure(bg=SIDEBAR)
+
+    for widget in widgets:
+        widget.bind("<Button-1>", invoke)
+        widget.bind("<Enter>", enter)
+        widget.bind("<Leave>", leave)
+
+    return item
+
+sidebar_divider()
+
+sidebar_item(
+    "Dashboard",
+    lambda: filter_domain("All"),
+    icon="⌂",
+    active=True,
 )
 
-tk.Button(
-    sidebar,
-    text="Dashboard",
-    bg=BLUE,
-    fg=TEXT,
-    bd=0,
-    activebackground=BLUE_2,
-    activeforeground=TEXT,
-    anchor="w",
-    padx=17,
-    pady=10,
-    font=("Segoe UI", 9, "bold"),
-).pack(
-    fill="x",
-    padx=10,
-    pady=(0, 10),
-)
+sidebar_heading("ASSESSMENT DOMAINS")
 
-tk.Label(
-    sidebar,
-    text="ASSESSMENT DOMAINS",
-    bg=SIDEBAR,
-    fg=MUTED,
-    font=("Segoe UI", 7, "bold"),
-).pack(
-    anchor="w",
-    padx=16,
-    pady=(2, 4),
-)
-
-domains = [
-    "All",
-    "Local Windows Security",
-    "Active Directory Readiness",
-    "Active Directory Security",
-    "Microsoft Entra Security",
+domain_specs = [
+    ("All", "All Controls", "▦"),
+    ("Local Windows Security", "Local Windows Security", "▣"),
+    ("Active Directory Readiness", "Active Directory Readiness", "△"),
+    ("Active Directory Security", "Active Directory Security", "△"),
+    ("Microsoft Entra Security", "Microsoft Entra Security", "♧"),
 ]
 
-for domain in domains:
-    label = "All Controls" if domain == "All" else domain
-
-    button = tk.Button(
-        sidebar,
-        text=label,
-        command=lambda value=domain: filter_domain(value),
-        bg=SIDEBAR,
-        fg=TEXT_2,
-        bd=0,
-        activebackground=SURFACE_3,
-        activeforeground=TEXT,
-        anchor="w",
-        padx=17,
-        pady=7,
-        font=("Segoe UI", 8, "bold"),
+for domain, label, icon in domain_specs:
+    button = sidebar_item(
+        label,
+        lambda value=domain: filter_domain(value),
+        icon=icon,
     )
-
-    button.pack(
-        fill="x",
-        padx=7,
-        pady=1,
-    )
-
     domain_buttons[domain] = button
 
-tk.Frame(
-    sidebar,
-    bg=BORDER,
-    height=1,
-).pack(
-    fill="x",
-    padx=14,
-    pady=12,
+sidebar_divider()
+sidebar_heading("ASSESSMENT MODES")
+
+sidebar_item(
+    "Run Real Assessment",
+    run_real,
+    subtitle="Real system assessment",
+    icon="✓",
 )
 
-tk.Label(
-    sidebar,
-    text="CONFIGURATION",
-    bg=SIDEBAR,
-    fg=MUTED,
-    font=("Segoe UI", 7, "bold"),
-).pack(
-    anchor="w",
-    padx=16,
-    pady=(0, 4),
+sidebar_item(
+    "Run Demo Scenario",
+    lambda: run_demo("balanced"),
+    subtitle="Simulated assessment",
+    icon="⚗",
 )
 
-tk.Frame(
-    sidebar,
-    bg=BORDER,
-    height=1,
-).pack(
-    fill="x",
-    padx=14,
-    pady=12,
+sidebar_item(
+    "Assessment History",
+    open_json,
+    subtitle="View previous results",
+    icon="◉",
 )
 
-tk.Label(
-    sidebar,
-    text="ASSESSMENT MODES",
-    bg=SIDEBAR,
-    fg=MUTED,
-    font=("Segoe UI", 7, "bold"),
-).pack(
-    anchor="w",
-    padx=16,
-    pady=(0, 4),
+sidebar_divider()
+sidebar_heading("CONFIGURATION")
+
+sidebar_item(
+    "Control Library",
+    open_control_library,
+    subtitle="Manage & extend controls",
+    icon="▤",
 )
 
-for text, command in [
-    ("Run Real Assessment", run_real),
-    ("Run Balanced Demo", lambda: run_demo("balanced")),
-    ("Assessment History", open_json),
-]:
-    tk.Button(
-        sidebar,
-        text=text,
-        command=command,
-        bg=SIDEBAR,
-        fg=TEXT_2,
-        bd=0,
-        activebackground=SURFACE_3,
-        activeforeground=TEXT,
-        anchor="w",
-        padx=17,
-        pady=7,
-        font=("Segoe UI", 8, "bold"),
-    ).pack(
-        fill="x",
-        padx=7,
-        pady=1,
-    )
+sidebar_item(
+    "Profile Manager",
+    open_methodology_settings,
+    subtitle="Manage assessment profiles",
+    icon="♟",
+)
 
-for text, command in [
-    ("Control Library", open_control_library),
-    ("Profile Manager", open_methodology_settings),
-    ("Entra Configuration", open_entra_config),
-]:
-    tk.Button(
-        sidebar,
-        text=text,
-        command=command,
-        bg=SIDEBAR,
-        fg=TEXT_2,
-        bd=0,
-        activebackground=SURFACE_3,
-        activeforeground=TEXT,
-        anchor="w",
-        padx=17,
-        pady=7,
-        font=("Segoe UI", 8, "bold"),
-    ).pack(
-        fill="x",
-        padx=7,
-        pady=1,
-    )
+sidebar_item(
+    "Entra Configuration",
+    open_entra_config,
+    subtitle="Microsoft Graph / Entra ID",
+    icon="☁",
+)
 
+sidebar_item(
+    "Application Settings",
+    open_methodology_settings,
+    subtitle="General configuration",
+    icon="⚙",
+)
+
+# Active profile card
 profile_card = tk.Frame(
     sidebar,
     bg=SURFACE,
     highlightbackground=BORDER,
     highlightthickness=1,
-    padx=12,
-    pady=10,
+    padx=13,
+    pady=11,
 )
 
 profile_card.pack(
     side="bottom",
     fill="x",
-    padx=10,
-    pady=12,
+    padx=12,
+    pady=(6, 10),
 )
 
 tk.Label(
     profile_card,
-    text="Active Profile",
+    text="Active Profile:",
     bg=SURFACE,
     fg=GREEN,
     font=("Segoe UI", 7, "bold"),
@@ -973,12 +1134,25 @@ sidebar_profile_name = tk.Label(
     text="Loading...",
     bg=SURFACE,
     fg=TEXT,
-    font=("Segoe UI", 10, "bold"),
+    font=("Segoe UI", 11, "bold"),
 )
 
 sidebar_profile_name.pack(
     anchor="w",
     pady=(3, 0),
+)
+
+sidebar_profile_updated = tk.Label(
+    profile_card,
+    text="Last Updated: current session",
+    bg=SURFACE,
+    fg=MUTED,
+    font=("Segoe UI", 6),
+)
+
+sidebar_profile_updated.pack(
+    anchor="w",
+    pady=(4, 0),
 )
 
 # ---------------- Main content ----------------
@@ -990,8 +1164,7 @@ main.grid(
 )
 
 main.grid_columnconfigure(0, weight=1)
-main.grid_columnconfigure(1, weight=0)
-main.grid_rowconfigure(4, weight=1)
+main.grid_rowconfigure(5, weight=1)
 
 # Header
 header = tk.Frame(main, bg=BG)
@@ -999,11 +1172,12 @@ header.grid(
     row=0,
     column=0,
     sticky="ew",
-    padx=24,
-    pady=(15, 6),
+    padx=10,
+    pady=(10, 5),
 )
 
 header.grid_columnconfigure(0, weight=1)
+header.grid_columnconfigure(1, weight=0)
 
 header_left = tk.Frame(header, bg=BG)
 header_left.grid(
@@ -1017,7 +1191,7 @@ tk.Label(
     text="Security Assessment Dashboard",
     bg=BG,
     fg=TEXT,
-    font=("Segoe UI", 23, "bold"),
+    font=("Segoe UI", 20, "bold"),
 ).pack(anchor="w")
 
 tk.Label(
@@ -1065,44 +1239,145 @@ profile_label = tk.Label(
 )
 profile_label.pack(side="left")
 
-right_rail = tk.Frame(
+progress_var = tk.IntVar(value=0)
+
+start_action_row = tk.Frame(
     main,
     bg=BG,
-    width=170,
 )
-right_rail.grid(
+start_action_row.grid(
+    row=1,
+    column=0,
+    sticky="ew",
+    padx=10,
+    pady=(3, 8),
+)
+start_action_row.grid_columnconfigure(0, weight=1)
+
+start_button = tk.Button(
+    start_action_row,
+    text="START DEFAULT ASSESSMENT",
+    command=run_real,
+    bg="#C62828",
+    fg=TEXT,
+    bd=0,
+    activebackground="#B71C1C",
+    activeforeground=TEXT,
+    padx=22,
+    pady=11,
+    font=("Segoe UI", 10, "bold"),
+    cursor="hand2",
+)
+start_button.grid(
+    row=0,
+    column=0,
+    pady=(0, 8),
+)
+
+assessment_progress_frame = tk.Frame(
+    start_action_row,
+    bg=SURFACE,
+    highlightbackground=BORDER,
+    highlightthickness=1,
+    padx=10,
+    pady=7,
+)
+assessment_progress_frame.grid(
+    row=1,
+    column=0,
+    sticky="ew",
+)
+assessment_progress_frame.grid_columnconfigure(0, weight=1)
+
+assessment_progress = ttk.Progressbar(
+    assessment_progress_frame,
+    maximum=100,
+    variable=progress_var,
+    style="Horizontal.TProgressbar",
+)
+assessment_progress.grid(
+    row=0,
+    column=0,
+    sticky="ew",
+)
+
+progress_percent_label = tk.Label(
+    assessment_progress_frame,
+    text="0%",
+    bg=SURFACE,
+    fg=CYAN,
+    font=("Segoe UI", 8, "bold"),
+    width=5,
+)
+progress_percent_label.grid(
     row=0,
     column=1,
-    rowspan=7,
-    sticky="nse",
-    padx=(0, 16),
-    pady=(18, 38),
+    padx=(10, 0),
 )
-right_rail.grid_propagate(False)
 
-def rail_button(text, command, color):
-    button = tk.Button(
-        right_rail,
-        text=text,
-        command=command,
-        bg=color,
-        fg=TEXT,
-        bd=0,
-        activebackground=BLUE_2,
-        activeforeground=TEXT,
-        padx=10,
-        pady=9,
-        font=("Segoe UI", 7, "bold"),
-        anchor="w",
-    )
-    button.pack(fill="x", pady=4)
-    return button
+progress_stage_label = tk.Label(
+    assessment_progress_frame,
+    text="Ready to run assessment",
+    bg=SURFACE,
+    fg=MUTED,
+    font=("Segoe UI", 7),
+    anchor="w",
+)
+progress_stage_label.grid(
+    row=1,
+    column=0,
+    columnspan=2,
+    sticky="w",
+    pady=(4, 0),
+)
 
-rail_button("Control Library", open_control_library, GREEN)
-rail_button("Profile Manager", open_methodology_settings, BLUE)
-rail_button("Entra Config", open_entra_config, PURPLE)
-rail_button("Export JSON", open_json, SURFACE_3)
-rail_button("Export HTML Report", open_html, SURFACE_3)
+header_actions = tk.Frame(
+    header,
+    bg=BG,
+)
+header_actions.grid(
+    row=0,
+    column=1,
+    sticky="ne",
+    padx=(12, 0),
+)
+
+actions_button = tk.Menubutton(
+    header_actions,
+    text="Actions  ▼",
+    bg=SURFACE_3,
+    fg=TEXT,
+    activebackground=BLUE_2,
+    activeforeground=TEXT,
+    bd=0,
+    relief="flat",
+    padx=16,
+    pady=10,
+    font=("Segoe UI", 8, "bold"),
+    anchor="center",
+)
+
+actions_menu = tk.Menu(
+    actions_button,
+    tearoff=False,
+    bg=SURFACE,
+    fg=TEXT,
+    activebackground=BLUE,
+    activeforeground=TEXT,
+    bd=0,
+    font=("Segoe UI", 9),
+)
+
+actions_menu.add_command(label="Control Library", command=open_control_library)
+actions_menu.add_command(label="Profile Manager", command=open_methodology_settings)
+actions_menu.add_command(label="Entra Configuration", command=open_entra_config)
+actions_menu.add_separator()
+actions_menu.add_command(label="Export JSON", command=open_json)
+actions_menu.add_command(label="Export HTML Report", command=open_html)
+
+actions_button.configure(menu=actions_menu)
+actions_button.pack()
+
 
 # Status row
 status_bar = tk.Frame(
@@ -1110,16 +1385,16 @@ status_bar = tk.Frame(
     bg=SURFACE,
     highlightbackground=BORDER,
     highlightthickness=1,
-    padx=10,
-    pady=7,
+    padx=12,
+    pady=9,
 )
 
 status_bar.grid(
-    row=1,
+    row=4,
     column=0,
     sticky="ew",
-    padx=24,
-    pady=(0, 7),
+    padx=10,
+    pady=(0, 5),
 )
 
 status_bar.grid_columnconfigure(1, weight=1)
@@ -1150,20 +1425,17 @@ activity_label.grid(
     sticky="w",
 )
 
-progress_var = tk.IntVar(value=0)
-progress_bar = ttk.Progressbar(
-    status_bar,
-    maximum=100,
-    variable=progress_var,
-    style="Horizontal.TProgressbar",
-    length=190,
-)
 
-progress_bar.grid(
-    row=0,
-    column=2,
-    sticky="e",
+history_link = tk.Label(
+    status_bar,
+    text="View Assessment History  →",
+    bg=SURFACE,
+    fg=CYAN,
+    font=("Segoe UI", 7, "bold"),
+    cursor="hand2",
 )
+history_link.grid(row=0, column=2, sticky="e", padx=(12, 0))
+history_link.bind("<Button-1>", lambda event: open_json())
 
 # KPI cards
 cards = tk.Frame(main, bg=BG)
@@ -1171,8 +1443,8 @@ cards.grid(
     row=2,
     column=0,
     sticky="ew",
-    padx=24,
-    pady=(0, 7),
+    padx=10,
+    pady=(0, 5),
 )
 
 for index in range(5):
@@ -1188,26 +1460,26 @@ def make_card(parent, column, title, accent, icon_kind):
         bg=SURFACE,
         highlightbackground=BORDER,
         highlightthickness=1,
-        padx=11,
-        pady=9,
+        padx=12,
+        pady=10,
     )
     frame.grid(
         row=0,
         column=column,
         sticky="nsew",
-        padx=4,
+        padx=3,
     )
     frame.grid_columnconfigure(1, weight=1)
 
     icon_canvas = tk.Canvas(
         frame,
-        width=48,
-        height=48,
+        width=42,
+        height=42,
         bg=SURFACE,
         highlightthickness=0,
     )
     icon_canvas.grid(row=0, column=0, rowspan=3, sticky="w", padx=(0, 8))
-    draw_card_icon(icon_canvas, icon_kind, accent)
+    draw_badge_icon(icon_canvas, 21, 21, icon_kind, accent)
 
     tk.Label(
         frame,
@@ -1222,7 +1494,7 @@ def make_card(parent, column, title, accent, icon_kind):
         text="—",
         bg=SURFACE,
         fg=accent,
-        font=("Segoe UI", 18, "bold"),
+        font=("Segoe UI", 16, "bold"),
     )
     value.grid(row=1, column=1, sticky="w", pady=(5, 1))
 
@@ -1232,7 +1504,7 @@ def make_card(parent, column, title, accent, icon_kind):
         bg=SURFACE,
         fg=TEXT_2,
         font=("Segoe UI", 6),
-        wraplength=170,
+        wraplength=135,
         justify="left",
     )
     subtitle.grid(row=2, column=1, sticky="w")
@@ -1293,16 +1565,13 @@ visuals.grid(
     row=3,
     column=0,
     sticky="ew",
-    padx=24,
-    pady=(0, 7),
+    padx=10,
+    pady=(0, 5),
 )
 
-for index in range(3):
-    visuals.grid_columnconfigure(
-        index,
-        weight=1,
-        uniform="visual",
-    )
+visuals.grid_columnconfigure(0, weight=34, uniform="visual")
+visuals.grid_columnconfigure(1, weight=33, uniform="visual")
+visuals.grid_columnconfigure(2, weight=33, uniform="visual")
 
 def visual_panel(parent, column):
     frame = tk.Frame(
@@ -1316,7 +1585,7 @@ def visual_panel(parent, column):
         row=0,
         column=column,
         sticky="nsew",
-        padx=4,
+        padx=3,
     )
 
     return frame
@@ -1364,18 +1633,22 @@ method_canvas.pack(
     pady=7,
 )
 
+gauge.bind("<Configure>", redraw_visuals)
+domain_canvas.bind("<Configure>", redraw_visuals)
+method_canvas.bind("<Configure>", redraw_visuals)
+
 # Bottom section
 bottom = tk.Frame(main, bg=BG)
 bottom.grid(
-    row=4,
+    row=5,
     column=0,
     sticky="nsew",
-    padx=24,
-    pady=(0, 7),
+    padx=10,
+    pady=(0, 5),
 )
 
-bottom.grid_columnconfigure(0, weight=1)
-bottom.grid_columnconfigure(1, weight=3)
+bottom.grid_columnconfigure(0, weight=24)
+bottom.grid_columnconfigure(1, weight=76)
 bottom.grid_rowconfigure(0, weight=1)
 
 summary_frame = tk.Frame(
@@ -1422,7 +1695,7 @@ summary_text = tk.Text(
     wrap="word",
     padx=0,
     pady=0,
-    height=8,
+    height=7,
 )
 
 summary_text.pack(
@@ -1437,7 +1710,7 @@ results_area.grid(
     row=0,
     column=1,
     sticky="nsew",
-    padx=(5, 4),
+    padx=(3, 0),
 )
 
 results_area.grid_rowconfigure(1, weight=1)
@@ -1494,6 +1767,7 @@ table_frame.grid(
     row=1,
     column=0,
     sticky="nsew",
+    ipadx=8,
 )
 
 table_frame.grid_rowconfigure(0, weight=1)
@@ -1514,7 +1788,7 @@ results_table = ttk.Treeview(
     table_frame,
     columns=columns,
     show="headings",
-    height=6,
+    height=7,
 )
 
 for column in columns:
@@ -1524,21 +1798,21 @@ for column in columns:
     )
 
 column_widths = {
-    "Control ID": 95,
-    "Domain": 160,
-    "Control": 225,
-    "Status": 80,
-    "Risk": 70,
+    "Control ID": 82,
+    "Domain": 145,
+    "Control": 235,
+    "Status": 68,
+    "Risk": 58,
     "Score": 70,
-    "Result": 190,
-    "Evidence": 60,
+    "Result": 125,
+    "Evidence": 58,
 }
 
 for column, width in column_widths.items():
     results_table.column(
         column,
         width=width,
-        minwidth=55,
+        minwidth=45,
         stretch=True,
     )
 
@@ -1597,7 +1871,7 @@ horizontal_scroll.grid(
     column=0,
     sticky="ew",
     padx=(7, 0),
-    pady=(0, 7),
+    pady=(0, 5),
 )
 
 results_table.bind(
@@ -1613,7 +1887,7 @@ footer = tk.Frame(
 )
 
 footer.grid(
-    row=5,
+    row=6,
     column=0,
     sticky="ew",
 )

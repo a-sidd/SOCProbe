@@ -1,127 +1,113 @@
-# SOCProbe
+# SOCProbe Enterprise v4.2
 
-SOCProbe is a local SOC assessment tool for small and medium-sized business environments. It is designed to run on a Windows Server environment and assess security posture by auditing Active Directory and Windows Security Logs.
+SOCProbe Enterprise v4.2 is a database-backed security assessment platform using the original SOCProbe Security Assessment Framework.
 
-The tool performs a lightweight local readiness assessment and produces:
-- security findings
-- a structured JSON report
-- a formatted PDF report
-- a SOC readiness score
+## Main changes
 
-This project was built as a cybersecurity capstone proof of concept focused on a single-company local deployment model. It is not a multi-tenant platform or web dashboard. The current scope is a local desktop application and backend assessment engine. :contentReference[oaicite:0]{index=0}
+- SQLite methodology database
+- Multiple assessment profiles
+- Editable control weights
+- Editable risk ratings
+- Editable thresholds
+- Editable grade bands
+- Real Windows, Active Directory, and Microsoft Entra collectors
+- Progress bar and live assessment status
+- HTML and JSON reports
+- Assessment history stored in SQLite
+- Robust paths independent of the launch directory
 
-## Core Features
+## Run
 
-- Active Directory connectivity and analysis
-- Windows Security Log / Event Viewer integration
-- Privileged group analysis
-- Stale account detection
-- Disabled privileged account detection
-- Event telemetry summary
-- Weighted rule-based SOC readiness scoring
-- JSON report generation
-- PDF report generation
-- Local desktop UI for running scans and reviewing results
-- Separate lab/demo simulator utility for generating controlled AD and Security Log activity
+```powershell
+pip install -r requirements.txt
+python main.py
+```
 
-## Project Scope
+## Profile Manager
 
-### Current Capstone Scope
-- Single-company local deployment
-- Windows Server 2022 lab environment
-- Local Python-based assessment tool
-- Desktop UI for scan execution and result review
-- JSON and PDF reporting
-- Transparent weighted scoring model
+Click **Profile Manager** to:
 
-### Future Scope
-- Web dashboard
-- Multi-company / multi-client support
-- Historical trend dashboards
-- Scheduled scans
-- Backend API services
-- Enterprise deployment model
+- create profiles
+- activate profiles
+- edit control weights
+- edit control risks
+- enable or disable controls
+- edit threshold JSON
+- edit grade bands
 
-## Architecture Overview
+Settings are stored in:
 
-SOCProbe is organized around these main components:
+```text
+socprobe.db
+```
 
-- Config Loader
-- AD Connector
-- Event Log Reader
-- Analysis Engine
-- Scoring Engine
-- Report Generator
-- Desktop UI
-- Activity Simulator
+No methodology JSON files are required.
 
-The tool connects to Active Directory using LDAP, reads Windows Security Log telemetry, analyzes identity and monitoring posture, calculates a readiness score, and generates reports. This matches the intended capstone architecture and goal of bridging security best practices with real environment validation. :contentReference[oaicite:1]{index=1}
+## Entra configuration
 
-## Scoring Model
+Click **Entra Config** and enter the app registration credentials.
 
-SOCProbe uses a custom weighted rule-based scoring model.
+## Real assessment
 
-**Formula:**
+Click:
 
-`Readiness Score = (Passed Control Weight / Total Control Weight) × 100`
+```text
+Run Real Windows/AD/Entra Assessment
+```
 
-### Current Control Weights
-- Privileged group analysis = 30
-- Stale account detection = 25
-- Disabled privileged account detection = 15
-- Log validation = 30
+## Security
 
-### Readiness Tiers
-- 80–100 = High
-- 60–79 = Moderate
-- 40–59 = Low
-- Below 40 = Poor
+Do not commit `entra_config.json` or `socprobe.db` if they contain company-specific information.
 
-The checks are framework-informed, but the numerical scoring model itself is a custom academic model designed to be transparent, explainable, and defensible during the capstone presentation. The current generated report reflects this model directly. :contentReference[oaicite:2]{index=2}
 
-## Main Files
+## Control Library Manager
 
-### Entry Points
-- `ui.py` - launches the main SOCProbe desktop application
-- `main.py` - runs the backend assessment flow directly
-- `launch_socprobe.pyw` - Windows launcher for the main app
-- `socprobe_activity_simulator.py` - launches the separate activity simulator utility
-- `launch_socprobe_activity_simulator.pyw` - Windows launcher for the simulator
+Click **Control Library** to:
 
-### Main UI
-- `socprobe_desktop.py` - final main desktop UI
+- add a custom control
+- edit a custom control
+- duplicate any control
+- enable or disable controls
+- delete custom controls
 
-### Documentation
-- `PROJECT_EXPLANATION.md` - detailed walkthrough of the full project
-- `README.md` - overview, setup, and usage
-- `config.template.json` - sample configuration template
+Built-in controls cannot be deleted or have their collector definitions changed. Their weight, risk, thresholds, and profile inclusion remain configurable.
 
-### Backend Modules
-Located in `modules/`:
-- `config_loader.py`
-- `ad_connector.py`
-- `event_log_reader.py`
-- `log_validation.py`
-- `analysis_engine.py`
-- `privileged_group_analyzer.py`
-- `stale_account_detector.py`
-- `disabled_account_checker.py`
-- `scoring_engine.py`
-- `report_generator.py`
+### Approved collector templates
 
-## Requirements
+- `windows_service`
+- `registry_value`
+- `event_id`
+- `local_group_member_count`
+- `powershell_boolean`
 
-- Windows Server environment
-- Python 3.11+ installed
-- Active Directory available and reachable
-- Permission to query AD
-- Permission to read the Windows Security log
-- Required Python packages installed from `requirements.txt`
+The PowerShell boolean option blocks common modification commands. It is intended only for simple read-only expressions.
 
-## Setup
+### Custom control example
 
-Clone the repository:
+```json
+{
+  "service_name": "Spooler",
+  "expected_status": "Stopped"
+}
+```
 
-```bash
-git clone https://github.com/siddahsa/SOCProbe.git
-cd SOCProbe
+Choose collector type:
+
+```text
+windows_service
+```
+
+The custom control is automatically added to all existing profiles and can then be assigned different weights, risks, thresholds, or enabled states in each profile.
+
+
+## v4.2 Interface improvements
+
+- Responsive equal-width score cards
+- Readable dashboard titles and labels
+- Four-step assessment workflow
+- Improved gauge and domain score panels
+- Separate failed and not-assessed counts
+- Responsive results table with vertical and horizontal scrollbars
+- Cleaner executive summary
+- Consistent export and configuration button labels
+- Better spacing for 1440p and 1080p displays
