@@ -1,10 +1,14 @@
 
 import json
 import sqlite3
+import sys
 from pathlib import Path
 from typing import Dict, List, Any
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(sys.executable).resolve().parent
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH = BASE_DIR / "socprobe.db"
 
 

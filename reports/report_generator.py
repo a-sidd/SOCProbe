@@ -1,8 +1,12 @@
 
 import json
+import sys
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(sys.executable).resolve().parent
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent
 
 REPORT_JSON = str(BASE_DIR / "socprobe_saf_real_assessment.json")
 REPORT_HTML = str(BASE_DIR / "socprobe_saf_real_report.html")

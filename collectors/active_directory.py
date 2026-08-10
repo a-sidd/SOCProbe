@@ -35,22 +35,15 @@ def check_stale_ad_users(thresholds=None):
     ok, msg = require_ad()
     if not ok:
         return False, msg
-    days = int(thresholds.get("stale_days", 90))
-    out, err, rc = run_ps(f"""
-    $cutoff = (Get-Date).AddDays(-{days})
+    out, err, rc = run_ps("""
+    $days = "$"
     Get-ADUser -Filter * -Properties LastLogonDate,Enabled |
-    Where-Object {{$_.Enabled -eq $true -and ($_.LastLogonDate -eq $null -or $_.LastLogonDate -lt $cutoff)}} |
+    Where-Object {$_.Enabled -eq $true -and ($_.LastLogonDate -eq $null -or $_.LastLogonDate -lt $cutoff)} |
     Select-Object -ExpandProperty SamAccountName
     """, timeout=30)
-    if rc != 0:
-        detail = err.strip() or "PowerShell returned a non-zero exit code."
-        return None, f"Unable to assess stale AD users: {detail}"
     users = [x.strip() for x in out.splitlines() if x.strip()]
     maximum = int(thresholds.get("maximum_stale_users", 0))
-    return len(users) <= maximum, (
-        f"Enabled AD users stale for more than {days} days or never logged in: "
-        f"{len(users)}. Examples: {', '.join(users[:15]) if users else 'None detected'}."
-    )
+    return len(users) <= maximum, f"Enabled stale/never logged in AD users: {len(users)}. Examples: {', '.join(users[:15]) if users else 'None detected'}."
 
 def check_disabled_privileged_users(thresholds=None):
     thresholds = thresholds or {}
