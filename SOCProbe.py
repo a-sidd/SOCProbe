@@ -15,7 +15,7 @@ from ui.profile_manager import ProfileManager
 from ui.control_library import ControlLibraryManager
 from ui.entra_config import EntraConfigDialog
 
-APP_VERSION = "SOCProbe Enterprise v4.2.1 - Responsive Assessment Console"
+APP_VERSION = "SOCProbe Enterprise v4.2 - Responsive Assessment Console"
 
 # ---------------- Theme ----------------
 BG = "#07111F"
@@ -902,7 +902,7 @@ tk.Label(
 
 tk.Label(
     brand_text,
-    text="Enterprise v4.2.1",
+    text="Enterprise v4.2",
     bg=SIDEBAR,
     fg=MUTED,
     font=("Segoe UI", 7),
@@ -1910,7 +1910,7 @@ tk.Label(
 
 tk.Label(
     footer,
-    text="Assessment Engine: v4.2.1   |   Database: Connected",
+    text="Assessment Engine: v4.2   |   Database: Connected",
     bg=SIDEBAR,
     fg=MUTED,
     font=("Segoe UI", 7),

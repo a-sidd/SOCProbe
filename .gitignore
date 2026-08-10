@@ -1,48 +1,6 @@
-# Secrets and machine-specific configuration
 entra_config.json
-.env
-.env.*
-
-# Local application state
 socprobe.db
-*.db-journal
-*.db-shm
-*.db-wal
-
-# Generated assessment reports
+__pycache__/
+*.pyc
 socprobe_saf_real_assessment.json
 socprobe_saf_real_report.html
-reports/*.json
-reports/*.html
-reports/*.pdf
-reports/*.tmp
-
-# Python cache and tooling
-__pycache__/
-*.py[cod]
-*$py.class
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Virtual environments
-.venv/
-venv/
-env/
-
-# Packaging output
-build/
-dist/
-*.spec
-
-# Editors and operating-system files
-.vscode/
-.idea/
-Thumbs.db
-Desktop.ini
-.DS_Store
-
-# Temporary files and logs
-*.log
-*.tmp
-*.bak
