@@ -334,7 +334,7 @@ def build_report(results, mode, context, profile):
 
     return {
         "tool": "SOCProbe Enterprise",
-        "version": "4.2",
+        "version": "4.2.1",
         "assessment_time": str(datetime.now()),
         "assessment_mode": mode,
         "active_profile": profile["profile_name"],
