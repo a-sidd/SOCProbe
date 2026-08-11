@@ -1,4 +1,4 @@
-# SOCProbe Enterprise v4.2
+# SOCProbe Enterprise v4.2.1
 
 SOCProbe Enterprise is a desktop security assessment console for auditing **local Windows security**, **Active Directory**, and **Microsoft Entra ID** against the SOCProbe Security Assessment Framework (SAF) - a 30-control methodology spanning four domains, with database-backed scoring, editable methodology, and HTML/JSON reporting.
 
